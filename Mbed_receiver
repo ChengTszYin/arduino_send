@@ -1,0 +1,29 @@
+#include "mbed.h"
+#include <cstdlib>
+
+// main() runs in its own thread in the OS
+Ticker ticker;
+DigitalOut led1(PC_9);
+DigitalOut led2(PC_10);
+int32_t can_baud = 100000;
+CAN can(PB_8, PB_9, can_baud);
+int8_t rece[4];
+
+int main()
+{   printf("main()\n");
+    CANMessage msg;
+    while (true) {
+        if(can.read(msg) && msg.id == 0x036){
+            for(int i=0;i<4;i++){
+                rece[i] = msg.data[i];
+                printf("received: %d\n", rece[i]);
+                led1 =! led1;
+            }
+            int data = (int)rece;
+            
+            led2 =! led2;
+        }
+        else{printf("not yet\n");}
+        ThisThread::sleep_for(100ms);
+    }
+}
