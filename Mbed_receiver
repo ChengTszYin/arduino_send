@@ -8,20 +8,24 @@ DigitalOut led2(PC_10);
 int32_t can_baud = 100000;
 CAN can(PB_8, PB_9, can_baud);
 int8_t rece[4];
+int32_t speed[4];
 
 int main()
 {   printf("main()\n");
     CANMessage msg;
     while (true) {
         if(can.read(msg) && msg.id == 0x036){
-            for(int i=0;i<4;i++){
-                rece[i] = msg.data[i];
-                printf("received: %d\n", rece[i]);
-                led1 =! led1;
+           for(int i=0;i<4;i++){
+                rece[i] = (int32_t)msg.data[i] - 48;
+                if(rece[i]<0){
+                    rece[i]=0;
+                }}
+            for(int j=0; j<4;j++){
+                speed[j]=rece[j];
             }
-            int data = (int)rece;
-            
-            led2 =! led2;
+
+            int equal = speed[0]*1000 + speed[1]*100 + speed[2]*10 + speed[3];
+            printf("received: %d\n", equal);
         }
         else{printf("not yet\n");}
         ThisThread::sleep_for(100ms);
