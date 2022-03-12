@@ -19,7 +19,7 @@ char hexaKeys[ROWS][COLS] = {
   {'*', '0', '#', 'D'}
 };
 byte rowPins[ROWS] = {9, 8, 7, 6};
-byte colPins[COLS] = {5, 4, 3, A3};
+byte colPins[COLS] = {5, 4, 3, 2};
 Keypad customKeypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS);
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 volatile char customKey;
@@ -27,7 +27,7 @@ int curr_s = 6;
 
 void setup() {
   // put your setup code here, to run once:
-Serial.begin(9600);
+Serial.begin(115200);
 lcd.init();
 lcd.backlight();
 lcd.setCursor(0, 0);
@@ -37,8 +37,10 @@ lcd.print("Input:");
 lcd.setCursor(8, 0);
 
 mcp2515.reset();
-mcp2515.setBitrate(CAN_100KBPS, MCP_8MHZ);
+mcp2515.setBitrate(CAN_1000KBPS, MCP_8MHZ);
 mcp2515.setNormalMode();
+canMsg1.can_id  = 0x036;
+canMsg1.can_dlc = 4;
 }
 
 void loop() {
@@ -47,7 +49,9 @@ customKey = customKeypad.getKey();
 if(customKey == 'A'){
   lcd.setCursor(8,0);
   lcd.print(atoi(s_Data));
-  strcpy(Data, s_Data);
+for(int i=0;i<4;i++){
+  Data[i]=s_Data[i];
+  }
   }
 else if(customKey == 'B'){
   lcd.clear();
@@ -72,18 +76,15 @@ customKey == '9' ||customKey == '0'){
   if(curr_s > 9){curr_s = 9;}
   if(data_count > 4){data_count = 3;}
   }
-  Serial.println("fuck");
-  Serial.println(canMsg1.data[0]);
-  Serial.println(canMsg1.data[1]);
-  Serial.println(canMsg1.data[2]);
-  Serial.println(canMsg1.data[3]);
-  canMsg1.can_id  = 0x036;
-  canMsg1.can_dlc = 4;
   canMsg1.data[0] = (uint8_t)Data[0];
   canMsg1.data[1] = (uint8_t)Data[1];
   canMsg1.data[2] = (uint8_t)Data[2];
   canMsg1.data[3] = (uint8_t)Data[3];
   mcp2515.sendMessage(&canMsg1);
+  Serial.println(canMsg1.data[0]);
+  Serial.println(canMsg1.data[1]);
+  Serial.println(canMsg1.data[2]);
+  Serial.println(canMsg1.data[3]);
 }
 
 void clearData()
