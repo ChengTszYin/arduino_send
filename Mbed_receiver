@@ -2,6 +2,9 @@
 #include <cstdint>
 #include <cstdlib>
 #include "vesc.h"
+#define TARGET_TX_PIN USBTX
+#define TARGET_RX_PIN USBRX
+static BufferedSerial serial_port(TARGET_TX_PIN, TARGET_RX_PIN, 115200);
 
 // main() runs in its own thread in the OS
 Ticker ticker;
